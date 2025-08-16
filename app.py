@@ -45,14 +45,25 @@ def load_model_and_processor(checkpoint_path: str):
     return model, processor, device
 
 # Path to your uploaded checkpoint (place best_model.pth in same folder as app.py)
+import requests, os
+
 MODEL_PATH = "best_model.pth"
+
+# Download model from Google Drive if not already cached
+if not os.path.exists(MODEL_PATH):
+    with st.spinner("Downloading model weights..."):
+        # Extract FILE_ID from your shared link
+        url = "https://drive.google.com/uc?export=download&id=1xXJR7L17v2ewupBM_gBe2FMQx9Dh_ykj"
+        r = requests.get(url, allow_redirects=True)
+        open(MODEL_PATH, 'wb').write(r.content)
 
 try:
     model, processor, device = load_model_and_processor(MODEL_PATH)
-    st.success("Model loaded successfully.")
+    st.success("✅ Model loaded successfully.")
 except Exception as e:
-    st.error(f"Could not load model from '{MODEL_PATH}'. Error: {e}")
+    st.error(f"❌ Could not load model. Error: {e}")
     st.stop()
+
 
 # ------------------------------
 # Utilities
@@ -129,3 +140,4 @@ if uploaded is not None:
     st.caption("Class 1 (red) = lesion; Class 0 = background.")
 else:
     st.info("Upload an image to get started.")
+
