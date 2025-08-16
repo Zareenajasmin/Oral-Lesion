@@ -23,8 +23,10 @@ with st.sidebar:
 # ------------------------------
 # Load model + processor (CPU/GPU auto)
 # ------------------------------
+from huggingface_hub import hf_hub_download
+
 @st.cache_resource(show_spinner=True)
-def load_model_and_processor(checkpoint_path: str):
+def load_model_and_processor():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     processor = SegformerImageProcessor.from_pretrained(
         "nvidia/segformer-b2-finetuned-ade-512-512"
@@ -35,37 +37,26 @@ def load_model_and_processor(checkpoint_path: str):
         ignore_mismatched_sizes=True,
     )
 
-    # ✅ Fix: force weights_only=False for backwards compatibility
+    # ✅ Download .pth file from Hugging Face Hub
+    checkpoint_path = hf_hub_download(
+        repo_id="zareejassy/oral-lesion",  # your repo name
+        filename="best_model.pth"          # file you uploaded
+    )
+
     state = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
     try:
         model.load_state_dict(state, strict=False)
     except Exception:
-        # If the file contains the whole model object instead of state_dict
         model = state
 
     model.eval().to(device)
     return model, processor, device
 
 
-# Path to your uploaded checkpoint (place best_model.pth in same folder as app.py)
-import gdown, os
-
-MODEL_PATH = "best_model.pth"
-
-def download_from_gdrive():
-    file_id = "1xXJR7L17v2ewupBM_gBe2FMQx9Dh_ykj"  # your model file ID
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
-    gdown.download(url, MODEL_PATH, quiet=False, fuzzy=True)
-
-# Download once if not already cached
-if not os.path.exists(MODEL_PATH):
-    with st.spinner("Downloading model weights from Google Drive..."):
-        download_from_gdrive()
-
 # Now load the model
 try:
-    model, processor, device = load_model_and_processor(MODEL_PATH)
-    st.success("✅ Model loaded successfully.")
+    model, processor, device = load_model_and_processor()
+    st.success("✅ Model loaded successfully from Hugging Face Hub.")
 except Exception as e:
     st.error(f"❌ Could not load model. Error: {e}")
     st.stop()
@@ -146,6 +137,7 @@ if uploaded is not None:
     st.caption("Class 1 (red) = lesion; Class 0 = background.")
 else:
     st.info("Upload an image to get started.")
+
 
 
 
