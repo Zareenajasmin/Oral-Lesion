@@ -3,4 +3,6 @@ transformers>=4.40
 torch>=2.1
 numpy>=1.23
 pillow>=9.5
+
 safetensors>=0.4
+gdown
