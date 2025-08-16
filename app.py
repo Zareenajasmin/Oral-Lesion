@@ -54,8 +54,8 @@ MODEL_PATH = "best_model.pth"
 
 def download_from_gdrive():
     file_id = "1xXJR7L17v2ewupBM_gBe2FMQx9Dh_ykj"  # your model file ID
-    url = f"https://drive.google.com/uc?id={file_id}"
-    gdown.download(url, MODEL_PATH, quiet=False)
+    url = f"https://drive.google.com/uc?export=download&id={file_id}"
+    gdown.download(url, MODEL_PATH, quiet=False, fuzzy=True)
 
 # Download once if not already cached
 if not os.path.exists(MODEL_PATH):
@@ -146,6 +146,7 @@ if uploaded is not None:
     st.caption("Class 1 (red) = lesion; Class 0 = background.")
 else:
     st.info("Upload an image to get started.")
+
 
 
 
