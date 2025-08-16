@@ -34,15 +34,18 @@ def load_model_and_processor(checkpoint_path: str):
         num_labels=2,
         ignore_mismatched_sizes=True,
     )
-    # Load your fine-tuned weights
-    state = torch.load(checkpoint_path, map_location="cpu")
+
+    # ✅ Fix: force weights_only=False for backwards compatibility
+    state = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
     try:
         model.load_state_dict(state, strict=False)
     except Exception:
-        # If the file saved the whole model (not state_dict)
+        # If the file contains the whole model object instead of state_dict
         model = state
+
     model.eval().to(device)
     return model, processor, device
+
 
 # Path to your uploaded checkpoint (place best_model.pth in same folder as app.py)
 import requests, os
@@ -148,5 +151,6 @@ if uploaded is not None:
     st.caption("Class 1 (red) = lesion; Class 0 = background.")
 else:
     st.info("Upload an image to get started.")
+
 
 
