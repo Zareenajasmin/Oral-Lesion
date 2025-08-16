@@ -48,21 +48,16 @@ def load_model_and_processor(checkpoint_path: str):
 
 
 # Path to your uploaded checkpoint (place best_model.pth in same folder as app.py)
-import requests, os
+import gdown, os
 
 MODEL_PATH = "best_model.pth"
 
 def download_from_gdrive():
-    file_id = "1xXJR7L17v2ewupBM_gBe2FMQx9Dh_ykj"  # your file ID
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
-    response = requests.get(url, stream=True)
-    if response.status_code == 200:
-        with open(MODEL_PATH, "wb") as f:
-            f.write(response.content)
-    else:
-        raise Exception(f"Download failed with status code {response.status_code}")
+    file_id = "1xXJR7L17v2ewupBM_gBe2FMQx9Dh_ykj"  # your model file ID
+    url = f"https://drive.google.com/uc?id={file_id}"
+    gdown.download(url, MODEL_PATH, quiet=False)
 
-# Download once if not already present
+# Download once if not already cached
 if not os.path.exists(MODEL_PATH):
     with st.spinner("Downloading model weights from Google Drive..."):
         download_from_gdrive()
@@ -151,6 +146,7 @@ if uploaded is not None:
     st.caption("Class 1 (red) = lesion; Class 0 = background.")
 else:
     st.info("Upload an image to get started.")
+
 
 
 
