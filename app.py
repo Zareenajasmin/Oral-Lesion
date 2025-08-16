@@ -49,14 +49,22 @@ import requests, os
 
 MODEL_PATH = "best_model.pth"
 
-# Download model from Google Drive if not already cached
-if not os.path.exists(MODEL_PATH):
-    with st.spinner("Downloading model weights..."):
-        # Extract FILE_ID from your shared link
-        url = "https://drive.google.com/uc?export=download&id=1xXJR7L17v2ewupBM_gBe2FMQx9Dh_ykj"
-        r = requests.get(url, allow_redirects=True)
-        open(MODEL_PATH, 'wb').write(r.content)
+def download_from_gdrive():
+    file_id = "1xXJR7L17v2ewupBM_gBe2FMQx9Dh_ykj"  # your file ID
+    url = f"https://drive.google.com/uc?export=download&id={file_id}"
+    response = requests.get(url, stream=True)
+    if response.status_code == 200:
+        with open(MODEL_PATH, "wb") as f:
+            f.write(response.content)
+    else:
+        raise Exception(f"Download failed with status code {response.status_code}")
 
+# Download once if not already present
+if not os.path.exists(MODEL_PATH):
+    with st.spinner("Downloading model weights from Google Drive..."):
+        download_from_gdrive()
+
+# Now load the model
 try:
     model, processor, device = load_model_and_processor(MODEL_PATH)
     st.success("✅ Model loaded successfully.")
@@ -140,4 +148,5 @@ if uploaded is not None:
     st.caption("Class 1 (red) = lesion; Class 0 = background.")
 else:
     st.info("Upload an image to get started.")
+
 
